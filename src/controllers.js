@@ -2,17 +2,18 @@
 const request = require('request');
 const axios = require('axios');
 
-const mainController = (req, res) =>
+/* const mainController = (req, res) =>
   res.send({
     message: 'Welcome to my jokes API!',
-  });
+  }); */
 
 const jokesController = (req, res) =>
   request('https://api.icndb.com/jokes', (error, jokesApiResponse) => {
     // making request to jokesApi
     if (error) {
-      console.log(error);
+      return res.status(error.statusCode).send({ error: error.message });
     }
+
     const parsedResponse = JSON.parse(jokesApiResponse.body); // response from jokesApi is JSON.stringified so i JSON.parse it
     // console.log(parsedResponse);
     res.send({ jokes: parsedResponse.value });
@@ -27,14 +28,11 @@ const randomJokesController = (req, res) => {
     .then(response => {
       res.send({ randomJoke: response.data.value });
     })
-    .catch(error => {
-      // eslint-disable-next-line
-          console.log(error);
-    });
-};
-/* res.send({
+    .catch(error => res.status(error.statusCode).send({ error: error.message }));
+  /* res.send({
   randomJoke: 'No jokes here yet, try again!',
 }); */
+};
 
 const personalJokeController = async (req, res) => {
   const { first, last } = req.params;
@@ -46,7 +44,7 @@ const personalJokeController = async (req, res) => {
 
     return res.send({ personalJoke: response.data.value });
   } catch (error) {
-    console.log(error);
+    return res.status(error.statusCode).send({ error: error.message });
   }
 };
 /* const personalJokeController = (req, res) =>
@@ -55,7 +53,7 @@ const personalJokeController = async (req, res) => {
   }); */
 
 module.exports = {
-  mainController,
+  // mainController,
   jokesController,
   randomJokesController,
   personalJokeController,

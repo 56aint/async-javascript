@@ -2,7 +2,7 @@
 const express = require('express');
 
 const {
-  mainController,
+  // mainController,  // replaced with homepage @ public folder
   jokesController,
   randomJokesController,
   personalJokeController,
@@ -10,7 +10,9 @@ const {
 
 const app = express();
 
-app.get('/', mainController);
+app.use(express.static('public'));
+
+// app.get('/', mainController); // now using express.static to get (/) 'the homepage'
 
 app.get('/jokes', jokesController);
 
