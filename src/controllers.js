@@ -1,37 +1,33 @@
-// import { re } from 'prettier';
 const request = require('request');
 const axios = require('axios');
+// const regeneratorRuntime = require('regenerator-runtime'); //const regeneratorRuntime = require('regenerator-runtime');
 
-/* const mainController = (req, res) =>
-  res.send({
-    message: 'Welcome to my jokes API!',
-  }); */
+const jokesController = async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.icndb.com/jokes`);
 
-const jokesController = (req, res) =>
-  request('https://api.icndb.com/jokes', (error, jokesApiResponse) => {
-    // making request to jokesApi
-    if (error) {
-      return res.status(error.statusCode).send({ error: error.message });
-    }
+    return res.send({ jokes: response.data.value });
+  } catch (error) {
+    return res.status(error.statusCode).send({ error: error.message });
+  }
+};
 
-    const parsedResponse = JSON.parse(jokesApiResponse.body); // response from jokesApi is JSON.stringified so i JSON.parse it
-    // console.log(parsedResponse);
-    res.send({ jokes: parsedResponse.value });
-  });
-/* res.send({
-    message: 'This is the jokes endpoint',
-  }); */
-
-const randomJokesController = (req, res) => {
+/*const randomJokesController = (req, res) => {
   axios
     .get('https://api.icndb.com/jokes/random?exclude=[explicit]')
     .then(response => {
       res.send({ randomJoke: response.data.value });
     })
-    .catch(error => res.status(error.statusCode).send({ error: error.message }));
-  /* res.send({
-  randomJoke: 'No jokes here yet, try again!',
-}); */
+    .catch(error => res.status(error.statusCode).send({ error: error.message }));*/
+
+const randomJokesController = async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.icndb.com/jokes/random?exclude=[explicit]`);
+
+    return res.send({ randomJoke: response.data.value });
+  } catch (error) {
+    return res.status(error.statusCode).send({ error: error.message });
+  }
 };
 
 const personalJokeController = async (req, res) => {
@@ -47,13 +43,8 @@ const personalJokeController = async (req, res) => {
     return res.status(error.statusCode).send({ error: error.message });
   }
 };
-/* const personalJokeController = (req, res) =>
-  res.json({
-    message: 'Hi, i can personalise your jokes!',
-  }); */
 
 module.exports = {
-  // mainController,
   jokesController,
   randomJokesController,
   personalJokeController,
