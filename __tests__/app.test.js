@@ -2,76 +2,28 @@
 const request = require('supertest');
 const nock = require('nock');
 const app = require('../src/app');
+const { mockListOfJokes, mockRandomJokes, mockPersonalJokes } = require('../data/test-data');
 
 describe('GET / - Homepage', () => {
   it('should respond with some homepage markup', async () => {
-    const res = await request(app).get('/');
-    expect(res.statusCode).toEqual(200);
-    expect(res.text).toContain('Hello, Welcome to my jokes API');
-
-    /* request(app)
+    request(app)
       .get('/')
       .then(res => {
         expect(res.statusCode).toEqual(200);
         expect(res.text).toContain('Hello, Welcome to my jokes API');
-      }); */
+      });
   });
 });
 
 describe('GET /jokes', () => {
   it('that jokes endpoint responds with list of jokes', async () => {
-    const mockResponse = {
-      type: 'success',
-      value: [
-        {
-          id: 1,
-          joke: 'i am a joke',
-          categories: [],
-        },
-        {
-          id: 2,
-          joke: 'i am another joke',
-          categories: [],
-        },
-      ],
-    };
-
     nock('https://api.icndb.com')
       .get('/jokes')
-      .reply(200, mockResponse);
+      .reply(200, mockListOfJokes);
 
     const res = await request(app).get('/jokes');
     expect(res.statusCode).toEqual(200);
-    expect(res.body.jokes).toEqual([
-      {
-        id: 1,
-        joke: 'i am a joke',
-        categories: [],
-      },
-      {
-        id: 2,
-        joke: 'i am another joke',
-        categories: [],
-      },
-    ]);
-
-    /* request(app)
-      .get('/jokes')
-      .then(res => {
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.jokes).toEqual([
-          {
-            id: 1,
-            joke: 'i am a joke',
-            categories: [],
-          },
-          {
-            id: 2,
-            joke: 'i am another joke',
-            categories: [],
-          },
-        ]);
-      }); */
+    expect(res.body.jokes).toEqual(mockListOfJokes.value);
   });
   it('should respond with an error message if something goes wrong', async () => {
     nock('https://api.icndb.com')
@@ -81,50 +33,19 @@ describe('GET /jokes', () => {
     const res = await request(app).get('/jokes');
     expect(res.statusCode).toEqual(500);
     expect(res.body.error).toEqual('huge error');
-
-    /* request(app)
-      .get('/jokes')
-      .then(res => {
-        expect(res.statusCode).toEqual(500);
-        expect(res.body.error).toEqual('huge error');
-      }); */
   });
 });
 
 describe('GET, /jokes/random', () => {
   it('should respond with a random joke', async () => {
-    const mockResponse = {
-      type: 'success',
-      value: {
-        id: 115,
-        joke: 'i am a random joke',
-        categories: [],
-      },
-    };
-
     nock('https://api.icndb.com')
       .get('/jokes/random')
       .query({ exclude: '[explicit]' })
-      .reply(200, mockResponse);
+      .reply(200, mockRandomJokes);
 
     const res = await request(app).get('/jokes/random');
     expect(res.statusCode).toEqual(200);
-    expect(res.body.randomJoke).toEqual({
-      categories: [],
-      id: 115,
-      joke: 'i am a random joke',
-    });
-
-    /* request(app)
-      .get('/jokes/random')
-      .then(res => {
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.randomJoke).toEqual({
-          categories: [],
-          id: 115,
-          joke: 'i am a random joke',
-        });
-      }); */
+    expect(res.body.randomJoke).toEqual(mockRandomJokes.value);
   });
   it('should respond with an error message if something goes wrong', async () => {
     nock('https://api.icndb.com')
@@ -135,42 +56,19 @@ describe('GET, /jokes/random', () => {
     const res = await request(app).get('/jokes/random');
     expect(res.statusCode).toEqual(404);
     expect(res.body.error).toEqual('unknown resource');
-
-    /*request(app)
-      .get('/jokes/random')
-      .then(res => {
-        expect(res.statusCode).toEqual(404);
-        expect(res.body.error).toEqual('unknown resource');
-      });*/
   });
 });
 
 describe('GET /jokes/random/personal', () => {
   it('test to retrieve jokes with personalised names ', async () => {
-    const mockResponse = {
-      type: 'success',
-      value: {
-        id: 141,
-        joke: 'random joke about manchester codes',
-        categories: [],
-      },
-    };
-
     nock('https://api.icndb.com')
       .get('/jokes/random')
       .query({ exclude: '[explicit]', firstName: 'manchester', lastName: 'codes' })
-      .reply(200, mockResponse);
+      .reply(200, mockPersonalJokes);
 
     const res = await request(app).get('/jokes/random/personal/manchester/codes');
     expect(res.statusCode).toEqual(200);
-    expect(res.body.personalJoke).toEqual(mockResponse.value);
-
-    /* request(app)
-      .get('/jokes/random/personal/manchester/codes')
-      .then(res => {
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.personalJoke).toEqual(mockResponse.value);
-      }); */
+    expect(res.body.personalJoke).toEqual(mockPersonalJokes.value);
   });
   it('should respond with an error message if something goes wrong', async () => {
     nock('https://api.icndb.com')
@@ -178,15 +76,8 @@ describe('GET /jokes/random/personal', () => {
       .query({ exclude: '[explicit]', firstName: 'manchester', lastName: 'codes' })
       .replyWithError({ statusCode: 500, message: 'Bad request' });
 
-    /*const res = await request(app).get('/jokes/personal/manchester/codes');
+    const res = await request(app).get('/jokes/random/personal/manchester/codes');
     expect(res.statusCode).toEqual(500);
-    expect(res.body.error).toEqual('Bad request');*/
-
-    request(app)
-      .get('/jokes/personal/manchester/codes')
-      .then(res => {
-        expect(res.statusCode).toEqual(500);
-        expect(res.body.error).toEqual('Bad request');
-      });
+    expect(res.body.error).toEqual('Bad request');
   });
 });
