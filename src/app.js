@@ -1,16 +1,10 @@
-// import { mainController } from './controllers';
 const express = require('express');
 
-const {
-  mainController,
-  jokesController,
-  randomJokesController,
-  personalJokeController,
-} = require('./controllers');
+const { jokesController, randomJokesController, personalJokeController } = require('./controllers');
 
 const app = express();
 
-app.get('/', mainController);
+app.use(express.static('public'));
 
 app.get('/jokes', jokesController);
 

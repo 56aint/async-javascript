@@ -1,35 +1,40 @@
-// import { re } from 'prettier';
-const request = require('request');
+const axios = require('axios');
 
-const mainController = (req, res) =>
-  res.send({
-    message: 'Welcome to my jokes API!',
-  });
+const jokesController = async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.icndb.com/jokes`);
 
-const jokesController = (req, res) =>
-  request('https://api.icndb.com/jokes', (error, jokesApiResponse) => {
-    if (error) {
-      console.log(error);
-    }
-    const parsedResponse = JSON.parse(jokesApiResponse.body);
+    res.send({ jokes: response.data.value });
+  } catch (error) {
+    res.status(error.statusCode).send({ error: error.message });
+  }
+};
 
-    res.send({ jokes: parsedResponse.value });
-  });
-/* res.send({
-    message: 'This is the jokes endpoint',
-  }); */
+const randomJokesController = async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.icndb.com/jokes/random?exclude=[explicit]`);
 
-const randomJokesController = (req, res) =>
-  res.send({
-    message: 'No jokes here yet, try again!',
-  });
-const personalJokeController = (req, res) =>
-  res.json({
-    message: 'Hi, i can personalise your jokes!',
-  });
+    res.send({ randomJoke: response.data.value });
+  } catch (error) {
+    res.status(error.statusCode).send({ error: error.message });
+  }
+};
+
+const personalJokeController = async (req, res) => {
+  const { first, last } = req.params;
+
+  try {
+    const response = await axios.get(
+      `https://api.icndb.com/jokes/random?firstName=${first}&lastName=${last}&exclude=[explicit]`,
+    );
+
+    res.send({ personalJoke: response.data.value });
+  } catch (error) {
+    res.status(error.statusCode).send({ error: error.message });
+  }
+};
 
 module.exports = {
-  mainController,
   jokesController,
   randomJokesController,
   personalJokeController,
